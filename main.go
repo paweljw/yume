@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	conn "yume/connection"
+	ntw "yume/network"
 )
 
 func main() {
@@ -26,8 +26,8 @@ func main() {
 			return
 		}
 		// TODO: handle banned IPs
-		connection := conn.Connection{Connection: c, State: conn.NewConnection}
-		conn.Connections.PushBack(connection)
+		connection := ntw.Connection{Connection: c, State: ntw.NewConnection}
+		ntw.Connections.PushBack(connection)
 		go connection.HandleConnection()
 	}
 }
