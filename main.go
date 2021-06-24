@@ -2,46 +2,79 @@ package main
 
 import (
 	"bufio"
+	"container/list"
 	"fmt"
 	"log"
 	"math/rand"
 	"net"
-	"strconv"
 	"strings"
 	"time"
+
+	"yume/color"
 )
 
 const MIN = 1
 const MAX = 100
 
-func random() int {
-	return rand.Intn(MAX-MIN) + MIN
+var connections = list.New()
+
+type ConnectionState int
+
+const (
+	NewConnection ConnectionState = iota
+	NewCharacter
+	NewPassword
+	RepeatPassword
+	SelectRace
+	ExistingCharacter
+	ExistingCharacterPassword
+	Playing
+)
+
+type Connection struct {
+	connection net.Conn
+	state      ConnectionState
 }
 
-func handleConnection(c net.Conn) {
-	log.Printf("Serving %s\n", c.RemoteAddr().String())
-	c.Write([]byte("Hello, client!\n"))
-	c.Write([]byte("#$#mcp version: 2.1 to: 2.1\n"))
+func (conn *Connection) handleConnection() {
+	log.Printf("Serving %s\n", conn.connection.RemoteAddr().String())
+	conn.connection.Write([]byte("Hello, client!\n"))
+	tellEveryone("A new challenger appears!\n")
 
 	for {
-		netData, err := bufio.NewReader(c).ReadString('\n')
+		netData, err := bufio.NewReader(conn.connection).ReadString('\n')
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
 		temp := strings.TrimSpace(string(netData))
-		if temp == "STOP" {
+		if temp == "quit" {
 			break
 		}
 		fmt.Println(temp)
 
-		result := strconv.Itoa(random()) + "\n"
-		c.Write([]byte(string(result)))
+		conn.connection.Write([]byte("Generic response\n"))
 	}
 
-	log.Printf("Finished serving %s\n", c.RemoteAddr().String())
-	c.Close()
+	log.Printf("Finished serving %s\n", conn.connection.RemoteAddr().String())
+	conn.connection.Close()
+	conn.removeFromList()
+}
+
+func (conn *Connection) removeFromList() {
+	for e := connections.Front(); e != nil; e = e.Next() {
+		if e.Value == conn {
+			connections.Remove(e)
+			return
+		}
+	}
+}
+
+func tellEveryone(s string) {
+	for e := connections.Front(); e != nil; e = e.Next() {
+		e.Value.(Connection).connection.Write([]byte(color.Colorize(s, color.Cyan)))
+	}
 }
 
 func main() {
@@ -60,6 +93,9 @@ func main() {
 			log.Println(err)
 			return
 		}
-		go handleConnection(c)
+		// TODO: handle banned IPs
+		connection := Connection{connection: c, state: NewConnection}
+		connections.PushBack(connection)
+		go connection.handleConnection()
 	}
 }
