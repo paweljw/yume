@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"strings"
 	"container/list"
+	cfg "yume/config"
 )
 
 var Connections = list.New()
@@ -30,8 +31,9 @@ type Connection struct {
 
 func (conn *Connection) HandleConnection() {
 	log.Printf("Serving %s\n", conn.Connection.RemoteAddr().String())
-	conn.Connection.Write([]byte("Hello, client!\n"))
-	TellEveryone("A new challenger appears!\n")
+	conn.Connection.Write([]byte(cfg.GetMessage("motd")))
+
+	TellEveryone(cfg.GetMessage("player_online"))
 
 	for {
 		netData, err := bufio.NewReader(conn.Connection).ReadString('\n')
