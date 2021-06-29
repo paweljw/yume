@@ -31,15 +31,15 @@ type Connection struct {
 
 func (conn *Connection) HandleConnection() {
 	log.Printf("Serving %s\n", conn.Connection.RemoteAddr().String())
-	conn.Connection.Write([]byte(cfg.GetMessage("motd")))
 
-	TellEveryone(cfg.GetMessage("player_online"))
+	TellPlayer(*conn, cfg.GetMessage("motd"))
+	TellEveryone(cfg.GetMessage("player_online"), 13)
 
 	for {
 		netData, err := bufio.NewReader(conn.Connection).ReadString('\n')
 		if err != nil {
 			log.Println(err)
-			return
+			return // TODO: Better (or actual) handling
 		}
 
 		temp := strings.TrimSpace(string(netData))
@@ -48,7 +48,7 @@ func (conn *Connection) HandleConnection() {
 			break
 		}
 
-		conn.Connection.Write([]byte("Generic response\n"))
+		TellPlayer(*conn, "Generic response")
 	}
 
 	log.Printf("Finished serving %s\n", conn.Connection.RemoteAddr().String())

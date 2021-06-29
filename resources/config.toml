@@ -1,3 +1,12 @@
 [messages]
-motd = "Hello there, General Kenobi\n"
-player_online = "A new challenger appears!\n"
+motd = """
+╔═════════════════════════════════════════╗
+║                                         ║
+║                {ccyan}Y U M E{crst}                  ║
+║                                         ║
+║         {cblue}A dream within a dream{crst}          ║
+║                                         ║
+╚═════════════════════════════════════════╝
+
+"""
+player_online = "{ccyan}A new challenger appears! The fmt test number is: %d{crst}"
