@@ -16,6 +16,11 @@ func TellPlayer(c Connection, s string, a ...interface{}) {
 	tellConnection(c, s, a...)
 }
 
+func PromptPlayer(c Connection, s string, a ...interface{}) {
+	tellConnection(c, s, a...)
+	Prompt(c)
+}
+
 func tellConnection(c Connection, s string, a ...interface{}) {
 	var str = fmt.Sprintf(s, a...)
 	if !strings.HasSuffix(str, "\n") {
@@ -24,4 +29,8 @@ func tellConnection(c Connection, s string, a ...interface{}) {
 	str = color.ColorByTags(str)
 
 	c.Connection.Write([]byte(str))
+}
+
+func Prompt(c Connection) {
+	c.Connection.Write([]byte("\n> "))
 }

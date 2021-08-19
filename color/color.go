@@ -13,6 +13,10 @@ const Purple = "\033[35m"
 const Cyan = "\033[36m"
 const White = "\033[37m"
 
+const Bold = "\u001b[1m"
+const Underline = "\u001b[4m"
+const Reversed = "\u001b[7m"
+
 var ColorMap = map[string]string {
 	"{crst}": Reset,
 	"{cred}": Red,
@@ -22,6 +26,10 @@ var ColorMap = map[string]string {
 	"{cpurple}": Purple,
 	"{ccyan}": Cyan,
 	"{cwhite}": White,
+	"{frst}": Reset,
+	"{fbold}": Bold,
+	"{funderline}": Underline,
+	"{freversed}": Reversed,
 }
 
 func Colorize(s string, c string) string {

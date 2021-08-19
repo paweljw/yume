@@ -1,3 +1,6 @@
+[config]
+bad_names = ["new", "quit", "admin", "system"]
+
 [messages]
 motd = """
 ╔═════════════════════════════════════════╗
@@ -9,4 +12,40 @@ motd = """
 ╚═════════════════════════════════════════╝
 
 """
+login_prompt = "Please type the name of your character to log in. Type {cyellow}new{crst} to create a new character."
+
 player_online = "{ccyan}A new challenger appears! The fmt test number is: %d{crst}"
+
+name_prompt = """
+The hooded figure looks you up and down. `Indeed, I don't think I've seen you here before. Let us start with the basics. Why don't you tell me your {fbold}name{frst}?`
+"""
+
+disallowed_name = "The hooded figure scoffs. {fbold}`No, no, no. Let's try this again. What is your name?`{frst}\n\n"
+
+accepted_name = """
+The hooded figure ponders for a while, then nods sagely. `So it is, so it is. {cyellow}%s{crst}. Good name. A strong one.`
+
+`Now, while we're getting to know each other... And trust me, we'll be {funderline}great{frst} friends before long... we should share a secret. Something only you and I know. A... {fbold}password{frst}, if you will.`
+"""
+
+repeat_password_prompt = """
+The hooded figure bends down towards you, listening intently. `You'll have to pardon me, I'm somewhat hard of hearing. Would you mind {fbold}repeating the password{frst} for me?`
+"""
+
+repeat_password_different = """
+The hooded figure bends back up. `Now now, I may be hard of hearing, but I'm not dumb, little one. These sound completely different! Let's start over - please {fbold}give me a password{frst}.`
+"""
+
+select_race_prompt = """
+The hooded figure claps its hands in joy. `Wonderful! Just great! Now then - and I do apologize, but it is dark in here - what race are you? A {fbold}human{frst}? A {fbold}dwarf{frst}? Or perhaps an {fbold}elf{frst}?`
+"""
+
+race_selected = """
+`Splendid! Aaand... yes, I've written it all down. Just shout your name and password at me next time we meet, little one.` The hooded figure cracks its fingers audibly. `Now then, run along...`
+"""
+
+provide_password = "Please provide password for {cyellow}%s{crst}"
+
+character_not_found = "We know of no brave hero by that name."
+
+welcome_back = "Welcome back, %s."
