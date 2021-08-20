@@ -4,10 +4,11 @@ import (
 	"log"
 )
 
-const TARGET_VERSION = 1
+const TARGET_VERSION = 2
 
 var Migrations = map[uint64]func(*Player) {
 	0: migrateToVersion1,
+	1: migrateToVersion2,
 }
 
 func MigratePlayer(player *Player) *Player {
@@ -27,4 +28,9 @@ func MigratePlayer(player *Player) *Player {
 
 func migrateToVersion1(player *Player) {
 	player.Version = 1
+}
+
+func migrateToVersion2(player *Player) {
+	player.RoomId = 100001
+	player.Version = 2
 }
