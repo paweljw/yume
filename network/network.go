@@ -30,6 +30,13 @@ func (conn *Connection) HandleConnection() {
 	for {
 		if conn.State == Playing {
 			conn.tell("We'd be applying the main command map here.")
+
+			if conn.Player.HasFlag("whatever") {
+				conn.tell("Yep")
+			} else {
+				conn.tell("Nope")
+			}
+
 			command, _ := conn.chomp()
 
 			actionWord := strings.ToLower(strings.Split(command, " ")[0])
@@ -62,9 +69,10 @@ func (conn *Connection) HandleConnection() {
 	if conn.Player.IsSaveable() {
 		conn.tell("Saving character...")
 		conn.Player.SaveToFile()
+		log.Printf("Saved %s to disk", conn.Player.Name)
 	}
 
-	log.Printf("Finished serving %s\n", conn.Connection.RemoteAddr().String())
+	log.Printf("Finished serving %s (%s)\n", conn.Connection.RemoteAddr().String(), conn.Player.Name)
 	conn.Connection.Close()
 	conn.removeFromList()
 }
@@ -87,6 +95,7 @@ func (conn *Connection) removeFromList() {
 	for e := Connections.Front(); e != nil; e = e.Next() {
 		if e.Value == conn {
 			Connections.Remove(e)
+			log.Printf("Removing from connection list")
 			return
 		}
 	}

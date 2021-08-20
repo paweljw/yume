@@ -20,6 +20,7 @@ type Player struct {
 	Name string
 	Password string
 	Race Race
+	Flags map[string]bool
 }
 
 func (player *Player) SetPassword(unsecurePassword string) {
@@ -50,6 +51,22 @@ func (player *Player) SaveToFile() error {
 
 func (player *Player) IsSaveable() bool {
 	return PlayerFileExists(player.Name)
+}
+
+func (player *Player) HasFlag(name string) bool {
+	return player.Flags[name] || false
+}
+
+func (player *Player) SetFlag(name string, value bool) {
+	if player.Flags == nil {
+		player.Flags = make(map[string]bool)
+	}
+
+	player.Flags[name] = value
+}
+
+func (player *Player) NameEquals(name string) bool {
+	return strings.ToLower(player.Name) == strings.ToLower(name)
 }
 
 func LoadPlayerFromFile(name string) (*Player, error) {

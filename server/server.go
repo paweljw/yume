@@ -32,7 +32,8 @@ func main() {
 		}
 		// TODO: handle banned IPs
 		connection := ntw.Connection{Connection: c, State: ntw.NewConnection}
-		ntw.Connections.PushBack(connection)
+		ntw.Connections.PushBack(&connection)
+		ntw.TellEveryone("stuff")
 		go connection.HandleConnection()
 	}
 }

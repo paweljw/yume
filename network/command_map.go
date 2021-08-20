@@ -7,4 +7,6 @@ func handleQuit(conn *Connection, command string) {
 
 var commandMap = map[string]func(conn *Connection, command string) {
 	"quit": handleQuit,
+	"set_flag": handleSetFlag,
+	"unset_flag": handleUnsetFlag,
 }

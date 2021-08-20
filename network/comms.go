@@ -8,7 +8,7 @@ import (
 
 func TellEveryone(s string, a ...interface{}) {
 	for e := Connections.Front(); e != nil; e = e.Next() {
-		tellConnection(e.Value.(Connection), s, a...)
+		tellConnection(*e.Value.(*Connection), s, a...)
 	}
 }
 

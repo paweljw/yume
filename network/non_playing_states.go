@@ -4,6 +4,7 @@ import (
 	cfg "yume/config"
 	"yume/game"
 	"strings"
+	"log"
 )
 
 func handleNewConnection(conn *Connection) {
@@ -22,13 +23,16 @@ func handleNewConnection(conn *Connection) {
 				conn.Player = player
 				conn.State = Playing
 				conn.tell(cfg.GetMessage("welcome_back"), conn.Player.Name)
+				log.Printf("Successful sign-in from %s", conn.Player.Name)
 			} else {
 				conn.State = NewConnection
+				log.Printf("Unsuccessful sign-in for %s", player.Name)
 			}
 
 		} else {
 			conn.tell(cfg.GetMessage("character_not_found"))
 			conn.prompt(cfg.GetMessage("login_prompt"))
+			log.Printf("Non-existing character login attempt: %s", command)
 			conn.State = NewConnection
 		}
 	}
@@ -92,6 +96,7 @@ func handleSelectRace(conn *Connection) {
 	}
 
 	conn.tell(cfg.GetMessage("race_selected"))
+	log.Printf("New character registered: %s ((%s))", conn.Player.Name, conn.Player.Race)
 	conn.State = Playing
 }
 
