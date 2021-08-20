@@ -38,6 +38,7 @@ func handleNewConnection(conn *Connection) {
 	}
 }
 
+// TODO: set sane defaults (e.g. version) for new player
 func handleNewCharacter(conn *Connection) {
 	conn.prompt(cfg.GetMessage("name_prompt"))
 
