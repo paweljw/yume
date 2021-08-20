@@ -48,6 +48,10 @@ func (player *Player) SaveToFile() error {
 	return err
 }
 
+func (player *Player) IsSaveable() bool {
+	return PlayerFileExists(player.Name)
+}
+
 func LoadPlayerFromFile(name string) (*Player, error) {
 	player := Player{}
 
