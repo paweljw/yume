@@ -8,89 +8,10 @@ import (
 	"container/list"
 	cfg "yume/config"
 	"yume/game"
+	"time"
 )
 
 var Connections = list.New()
-
-func handleNewCharacterState(conn *Connection, command string) {
-	switch conn.State {
-
-	case NewCharacter:
-		if cfg.IsBadName(command) {
-			conn.prompt(cfg.GetMessage("disallowed_name"))
-		} else { // TODO: Handle existing name
-			conn.Player.Name = command
-			conn.State = NewPassword
-			conn.prompt(cfg.GetMessage("accepted_name"), command)
-		}
-
-	case NewPassword:
-		conn.Player.SetPassword(command)
-		conn.State = RepeatPassword
-		conn.prompt(cfg.GetMessage("repeat_password_prompt"))
-	case RepeatPassword:
-		if conn.Player.ComparePassword(command) {
-			conn.State = SelectRace
-			conn.prompt(cfg.GetMessage("select_race_prompt"))
-		} else {
-			conn.State = NewPassword
-			conn.prompt(cfg.GetMessage("repeat_password_different"))
-		}
-	case SelectRace:
-		race := strings.ToLower(command)
-
-		switch race {
-		case "human":
-			conn.Player.Race = game.Human
-		case "elf":
-			conn.Player.Race = game.Elf
-		case "dwarf":
-			conn.Player.Race = game.Dwarf
-		default:
-			conn.State = SelectRace
-			conn.prompt(cfg.GetMessage("select_race_prompt"))
-
-			return
-		}
-
-		err := conn.Player.SaveToFile()
-
-		if err != nil {
-			conn.State = NewConnection
-			conn.prompt(cfg.GetMessage("login_prompt"))
-			return
-		}
-
-		conn.State = Playing
-		conn.tell(cfg.GetMessage("race_selected"))
-		conn.prompt("")
-	}
-}
-
-func handleExistingCharacter(conn *Connection, command string) {
-	switch conn.State {
-	case ExistingCharacter:
-		if game.PlayerFileExists(command) {
-			conn.prompt(cfg.GetMessage("provide_password"), command)
-			conn.State = ExistingCharacterPassword
-			player, _ := game.LoadPlayerFromFile(command)
-			conn.Player = player
-		} else {
-			conn.tell(cfg.GetMessage("character_not_found"))
-			conn.prompt(cfg.GetMessage("login_prompt"))
-			conn.State = NewConnection
-		}
-	case ExistingCharacterPassword:
-		if conn.Player.ComparePassword(command) {
-			conn.State = Playing
-			conn.tell(cfg.GetMessage("welcome_back"), conn.Player.Name)
-		} else {
-			conn.Player = new(game.Player)
-			conn.State = NewConnection
-			conn.prompt(cfg.GetMessage("login_prompt"))
-		}
-	}
-}
 
 type Connection struct {
 	Connection net.Conn
@@ -103,53 +24,130 @@ func (conn *Connection) HandleConnection() {
 	conn.Player = new(game.Player)
 
 	conn.tell(cfg.GetMessage("motd"))
-	conn.prompt(cfg.GetMessage("login_prompt"))
+	conn.State = NewConnection
 
 	for {
-		netData, err := bufio.NewReader(conn.Connection).ReadString('\n')
-		if err != nil {
-			log.Println(err)
-			TellPlayer(*conn, "Something went very wrong. Please sign in again.")
-			break
-		}
-		conn.tell("\n") // Send a single newline as a keepalive
+		if conn.State == Playing {
+			conn.tell("We'd be applying the main command map here.")
+			command, _ := conn.chomp()
 
-		command := strings.TrimSpace(netData)
-
-		// `quit` is a top-level command, available _everywhere_.
-		if command == "quit" {
-			TellPlayer(*conn, "Well, bye for now.")
-			break
-		}
-
-		// refactor with option to loop through state updates here
-		if isNewCharacterState(conn.State) {
-			handleNewCharacterState(conn, command)
-		} else if conn.State == ExistingCharacterPassword {
-			handleExistingCharacter(conn, command)
-		} else if conn.State == NewConnection {
-			switch command {
-			case "new":
-				conn.State = NewCharacter
-				conn.prompt(cfg.GetMessage("name_prompt"))
-			default:
-				conn.State = ExistingCharacter
-				handleExistingCharacter(conn, command)
+			if command == "quit" {
+				break
 			}
-		} else if conn.State == Playing {
-			// TODO: Eventually take over with the main command map here
-			conn.prompt("Well, nice of you to drop by. You can go ahead and ``quit``.")
-		} else {
-			conn.State = NewConnection
-			TellPlayer(*conn, "Damn, how'd you even GET here? Bootin' ya.")
-			break
+		} else { // this covers non playing states
+			switch conn.State {
+			case NewConnection:
+				conn.prompt(cfg.GetMessage("login_prompt"))
+
+				command, _ := conn.chomp()
+
+				if command == "new" {
+					conn.State = NewCharacter
+					continue
+				} else { // existing character
+					if game.PlayerFileExists(command) {
+						conn.prompt(cfg.GetMessage("provide_password"), command)
+						player, _ := game.LoadPlayerFromFile(command)
+						command, _ = conn.chomp()
+						if player.ComparePassword(command) {
+							conn.tell(cfg.GetMessage("welcome_back"), conn.Player.Name)
+							conn.Player = player
+							conn.State = Playing
+							continue
+						} else {
+							conn.State = NewConnection
+						}
+
+					} else {
+						conn.tell(cfg.GetMessage("character_not_found"))
+						conn.prompt(cfg.GetMessage("login_prompt"))
+						conn.State = NewConnection
+					}
+				}
+
+			case NewCharacter:
+				conn.prompt(cfg.GetMessage("name_prompt"))
+
+				name, _ := conn.chomp()
+
+				if cfg.IsBadName(name) || game.PlayerFileExists(name) {
+					conn.tell(cfg.GetMessage("disallowed_name"))
+					continue
+				} else {
+					conn.Player.Name = name
+					conn.State = NewPassword
+					conn.prompt(cfg.GetMessage("accepted_name"), conn.Player.Name)
+					continue
+				}
+			case NewPassword:
+				pass, _ := conn.chomp()
+				conn.Player.SetPassword(pass)
+				conn.State = RepeatPassword
+				continue
+			case RepeatPassword:
+				conn.prompt(cfg.GetMessage("repeat_password_prompt"))
+				pass, _ := conn.chomp()
+				if conn.Player.ComparePassword(pass) {
+					conn.State = SelectRace
+					continue
+				} else {
+					conn.prompt(cfg.GetMessage("repeat_password_different"))
+					conn.State = NewPassword
+					continue
+				}
+			case SelectRace:
+				conn.prompt(cfg.GetMessage("select_race_prompt"))
+				race, _ := conn.chomp()
+				race = strings.ToLower(race)
+
+				switch race {
+				case "human":
+					conn.Player.Race = game.Human
+				case "elf":
+					conn.Player.Race = game.Elf
+				case "dwarf":
+					conn.Player.Race = game.Dwarf
+				default:
+					conn.State = SelectRace
+					continue
+				}
+
+				err := conn.Player.SaveToFile()
+
+				if err != nil {
+					conn.State = NewConnection
+					continue
+				}
+
+				conn.tell(cfg.GetMessage("race_selected"))
+				conn.State = Playing
+				continue
+			default:
+				conn.tell("How'd you even get here, bro? Bye.")
+				break
+			}
 		}
 	}
 
 
+	conn.tell("Abayo.")
 	log.Printf("Finished serving %s\n", conn.Connection.RemoteAddr().String())
 	conn.Connection.Close()
 	conn.removeFromList()
+}
+
+func (conn *Connection) chomp() (string, error) {
+	netData, err := bufio.NewReader(conn.Connection).ReadString('\n')
+	if err != nil {
+		log.Println(err)
+		TellPlayer(*conn, "Something went very wrong. Please sign in again.")
+		return "", err
+	}
+	conn.tell("\n") // Send a single newline as a keepalive
+
+	command := strings.TrimSpace(netData)
+
+	return command, nil
 }
 
 func (conn *Connection) removeFromList() {

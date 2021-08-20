@@ -20,7 +20,7 @@ name_prompt = """
 The hooded figure looks you up and down. `Indeed, I don't think I've seen you here before. Let us start with the basics. Why don't you tell me your {fbold}name{frst}?`
 """
 
-disallowed_name = "The hooded figure scoffs. {fbold}`No, no, no. Let's try this again. What is your name?`{frst}\n\n"
+disallowed_name = "The hooded figure scoffs. {fbold}`No, no, no. I cannot accept this. Let's try this again.`{frst}\n\n"
 
 accepted_name = """
 The hooded figure ponders for a while, then nods sagely. `So it is, so it is. {cyellow}%s{crst}. Good name. A strong one.`
