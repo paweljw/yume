@@ -1,0 +1,8 @@
+{
+    "Id": 100002,
+    "CarpenterTag": "newbieroom",
+    "Description": "Once upon a midnight dreary, it's a different fucking room.",
+    "Connections": {
+        "east": 100001
+    }
+}
