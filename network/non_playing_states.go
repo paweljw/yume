@@ -20,7 +20,7 @@ func handleNewConnection(conn *Connection) {
 			player, _ := game.LoadPlayerFromFile(command)
 			command, _ = conn.chomp()
 			if player.ComparePassword(command) {
-				conn.Player = player
+				conn.Player = game.MigratePlayer(player)
 				conn.State = Playing
 				conn.tell(cfg.GetMessage("welcome_back"), conn.Player.Name)
 				log.Printf("Successful sign-in from %s", conn.Player.Name)

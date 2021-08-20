@@ -21,6 +21,7 @@ type Player struct {
 	Password string
 	Race Race
 	Flags map[string]bool
+	Version uint64
 }
 
 func (player *Player) SetPassword(unsecurePassword string) {
