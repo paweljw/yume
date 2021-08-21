@@ -5,15 +5,29 @@ import (
 	"encoding/json"
 	"path/filepath"
 	"log"
+	"strings"
 )
 
 var Rooms = make(map[uint64]Room)
 
 type Room struct {
 	Id uint64
+	Zone string
 	CarpenterTag string
 	Description string
 	Connections map[string]uint64
+}
+
+func (room *Room) Exits() string {
+	keys := make([]string, len(room.Connections))
+
+	i := 0
+	for k := range room.Connections {
+		keys[i] = k
+		i++
+	}
+
+	return strings.Join(keys, ", ")
 }
 
 func LoadRoomFromFile(filename string) (Room, error) {

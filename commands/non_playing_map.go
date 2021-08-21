@@ -24,6 +24,8 @@ func handleNewSession(conn *session.Session) {
 				conn.Player = game.MigratePlayer(player)
 				conn.State = session.Playing
 				conn.Tell(cfg.GetMessage("welcome_back"), conn.Player.Name)
+				MovePlayer(conn, conn.Player.RoomId) // TODO: When hearthstones exist, move player to their HS location for safety
+
 				log.Printf("Successful sign-in from %s", conn.Player.Name)
 			} else {
 				conn.State = session.NewSession

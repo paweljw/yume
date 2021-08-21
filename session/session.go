@@ -9,6 +9,7 @@ import (
 	"yume/game"
 )
 
+// TODO: Lists in go are not thread-safe, oh joy.
 var Sessions = list.New()
 
 type Session struct {

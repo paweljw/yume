@@ -1,5 +1,6 @@
 {
     "Id": 100001,
+    "Zone": "newbiezone",
     "CarpenterTag": "newbieroom",
     "Description": "Once upon a midnight dreary, it's a fucking room.",
     "Connections": {
