@@ -9,6 +9,7 @@ func handleQuit(conn *session.Session, command string) {
 	conn.Finishing = true
 }
 
+// TODO: some help
 var Map = map[string]func(conn *session.Session, command string) {
 	"quit": handleQuit,
 	"set_flag": handleSetFlag,

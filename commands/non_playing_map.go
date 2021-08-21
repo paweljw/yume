@@ -102,6 +102,7 @@ func handleSelectRace(conn *session.Session) {
 	conn.Tell(cfg.GetMessage("race_selected"))
 	log.Printf("New character registered: %s ((%s))", conn.Player.Name, conn.Player.Race)
 	conn.State = session.Playing
+	MovePlayer(conn, conn.Player.RoomId) // TODO: Move player to designated newbie spot
 }
 
 var NonPlayingStates = map[session.SessionState]func(*session.Session){
