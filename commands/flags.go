@@ -5,6 +5,7 @@ import (
 	"yume/game"
 	ses "yume/session"
 	"log"
+	"container/list"
 )
 
 func toggleFlag(session *ses.Session, command string, value bool) {
@@ -17,7 +18,7 @@ func toggleFlag(session *ses.Session, command string, value bool) {
 		// Step 1: if player is signed on, let's find them and do them up
 		doneOnline := false
 
-		for e := ses.Sessions.Front(); e != nil; e = e.Next() {
+		ses.Sessions.ConcurrentIterate(func(e *list.Element) bool {
 			c := *e.Value.(*ses.Session)
 
 			if c.Player.NameEquals(playerName) {
@@ -27,9 +28,11 @@ func toggleFlag(session *ses.Session, command string, value bool) {
 				session.Tell("Granted flag %s to %s (online)", flagName, playerName)
 				log.Printf("%s granted flag %s to %s", session.Player.Name, flagName, playerName)
 				doneOnline = true
-				break
+				return true
 			}
-		}
+
+			return false
+		})
 
 		if !doneOnline {
 			player, err := game.LoadPlayerFromFile(playerName)

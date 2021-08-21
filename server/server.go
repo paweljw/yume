@@ -40,7 +40,9 @@ func main() {
 		}
 		// TODO: handle banned IPs
 		connection := ses.Session{Connection: c, State: ses.NewSession}
-		ses.Sessions.PushBack(&connection)
+
+		ses.Sessions.ConcurrentPushBack(&connection)
+
 		go ntw.HandleSession(&connection)
 	}
 }

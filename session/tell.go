@@ -4,12 +4,14 @@ import (
 	"yume/color"
 	"strings"
 	"fmt"
+	"container/list"
 )
 
 func TellEveryone(s string, a ...interface{}) {
-	for e := Sessions.Front(); e != nil; e = e.Next() {
+	Sessions.ConcurrentIterate(func (e *list.Element) bool {
 		tellSession(*e.Value.(*Session), s, a...)
-	}
+		return false
+	})
 }
 
 func TellPlayer(c Session, s string, a ...interface{}) {

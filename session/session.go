@@ -9,8 +9,7 @@ import (
 	"yume/game"
 )
 
-// TODO: Lists in go are not thread-safe, oh joy.
-var Sessions = list.New()
+var Sessions = CreateSessionList()
 
 type Session struct {
 	Connection net.Conn
@@ -38,11 +37,12 @@ func (session *Session) Tell(msg string, a...interface{}) {
 }
 
 func RemoveSessionFromList(session *Session) {
-	for e := Sessions.Front(); e != nil; e = e.Next() {
+	Sessions.ConcurrentIterate(func(e *list.Element) bool {
 		if e.Value == session {
-			Sessions.Remove(e)
-			return
+			Sessions.List.Remove(e)
+			return true
 		}
-	}
-}
 
+		return false
+	})
+}
