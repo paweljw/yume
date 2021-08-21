@@ -2,110 +2,62 @@ package network
 
 import (
 	"log"
-	"net"
-	"bufio"
 	"strings"
-	"container/list"
 	cfg "yume/config"
 	"yume/game"
+	ses "yume/session"
+	"yume/commands"
 )
 
-var Connections = list.New()
 
-type Connection struct {
-	Connection net.Conn
-	State      ConnectionState
-	Player	   *game.Player
-	Finishing  bool
-}
+func HandleSession(session *ses.Session) {
+	log.Printf("Serving %s\n", session.Connection.RemoteAddr().String())
+	session.Player = new(game.Player) // TODO: Create one with sane defaults
+	session.Finishing = false
 
-func (conn *Connection) HandleConnection() {
-	log.Printf("Serving %s\n", conn.Connection.RemoteAddr().String())
-	conn.Player = new(game.Player)
-	conn.Finishing = false
-
-	conn.tell(cfg.GetMessage("motd"))
-	conn.State = NewConnection
+	session.Tell(cfg.GetMessage("motd"))
+	session.State = ses.NewSession
 
 	for {
-		if conn.State == Playing {
-			conn.tell("We'd be applying the main command map here.")
-
-			if conn.Player.HasFlag("whatever") {
-				conn.tell("Yep")
-			} else {
-				conn.tell("Nope")
-			}
-
-			command, _ := conn.chomp()
+		if session.State == ses.Playing {
+			// TODO: Proper command tokenizer
+			command, _ := session.Chomp()
 
 			actionWord := strings.ToLower(strings.Split(command, " ")[0])
 
-			handler := commandMap[actionWord]
+			handler := commands.Map[actionWord]
 
 			if handler != nil {
-				handler(conn, command)
+				handler(session, command)
 			} else {
-				conn.tell("What?")
+				session.Tell("What?")
 			}
 
 		} else { // this covers non playing states
-			handler := nonPlayingStates[conn.State]
+			handler := commands.NonPlayingStates[session.State]
 
 			if handler != nil {
-				handler(conn)
+				handler(session)
 				continue
 			} else {
-				conn.tell("How'd you even get here, bro? Bye.")
+				session.Tell("How'd you even get here, bro? Bye.")
 				break
 			}
 		}
 
-		if conn.Finishing {
+		if session.Finishing {
 			break
 		}
 	}
 
-	if conn.Player.IsSaveable() {
-		conn.tell("Saving character...")
-		conn.Player.SaveToFile()
-		log.Printf("Saved %s to disk", conn.Player.Name)
+	if session.Player.IsSaveable() {
+		session.Tell("Saving character...")
+		session.Player.SaveToFile()
+		log.Printf("Saved %s to disk", session.Player.Name)
 	}
 
-	log.Printf("Finished serving %s (%s)\n", conn.Connection.RemoteAddr().String(), conn.Player.Name)
-	conn.Connection.Close()
-	conn.removeFromList()
+	log.Printf("Finished serving %s (%s)\n", session.Connection.RemoteAddr().String(), session.Player.Name)
+	session.Connection.Close()
+	ses.RemoveSessionFromList(session)
 }
 
-func (conn *Connection) chomp() (string, error) {
-	netData, err := bufio.NewReader(conn.Connection).ReadString('\n')
-	if err != nil {
-		log.Println(err)
-		TellPlayer(*conn, "Something went very wrong. Please sign in again.")
-		return "", err
-	}
-	conn.tell("\n") // Send a single newline as a keepalive
-
-	command := strings.TrimSpace(netData)
-
-	return command, nil
-}
-
-func (conn *Connection) removeFromList() {
-	for e := Connections.Front(); e != nil; e = e.Next() {
-		if e.Value == conn {
-			Connections.Remove(e)
-			log.Printf("Removing from connection list")
-			return
-		}
-	}
-}
-
-
-func (conn *Connection) tell(msg string, a...interface{}) {
-	TellPlayer(*conn, msg, a...)
-}
-
-func (conn *Connection) prompt(msg string, a...interface{}) {
-	PromptPlayer(*conn, msg, a...)
-}

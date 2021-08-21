@@ -6,6 +6,7 @@ import (
 	"net"
 	"time"
 	ntw "yume/network"
+	ses "yume/session"
 	cfg "yume/config"
 	"yume/game"
 )
@@ -38,9 +39,8 @@ func main() {
 			return
 		}
 		// TODO: handle banned IPs
-		connection := ntw.Connection{Connection: c, State: ntw.NewConnection}
-		ntw.Connections.PushBack(&connection)
-		ntw.TellEveryone("stuff")
-		go connection.HandleConnection()
+		connection := ses.Session{Connection: c, State: ses.NewSession}
+		ses.Sessions.PushBack(&connection)
+		go ntw.HandleSession(&connection)
 	}
 }
