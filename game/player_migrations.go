@@ -34,3 +34,16 @@ func migrateToVersion2(player *Player) {
 	player.RoomId = 100001
 	player.Version = 2
 }
+
+func DefaultPlayer() *Player {
+	player := Player{
+		Name: "",
+		Password: "",
+		Race: Human,
+		Flags: make(map[string]bool),
+		Version: TARGET_VERSION,
+		RoomId: 100001,
+	}
+
+	return &player
+}

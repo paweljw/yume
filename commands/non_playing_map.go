@@ -39,7 +39,6 @@ func handleNewSession(conn *session.Session) {
 	}
 }
 
-// TODO: set sane defaults (e.g. version) for new player
 func handleNewCharacter(conn *session.Session) {
 	conn.Tell(cfg.GetMessage("name_prompt"))
 

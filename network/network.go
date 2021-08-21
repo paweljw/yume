@@ -12,7 +12,7 @@ import (
 
 func HandleSession(session *ses.Session) {
 	log.Printf("Serving %s\n", session.Connection.RemoteAddr().String())
-	session.Player = new(game.Player) // TODO: Create one with sane defaults
+	session.Player = game.DefaultPlayer()
 	session.Finishing = false
 
 	session.Tell(cfg.GetMessage("motd"))
