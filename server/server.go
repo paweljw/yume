@@ -12,6 +12,10 @@ import (
 )
 
 func main() {
+
+	// game.TestLexer()
+	// panic(1)
+
 	log.Println("Yume is initializing")
 
 	cfg.LoadConfiguration()
@@ -20,6 +24,10 @@ func main() {
 	log.Println("Begin loading rooms")
 	game.LoadAllRooms()
 	log.Println("Loaded all rooms")
+
+	log.Println("Begin loading items")
+	game.LoadAllItems()
+	log.Println("Loaded all items")
 
 	PORT := ":19000"
 	l, err := net.Listen("tcp4", PORT)

@@ -46,6 +46,7 @@ func handleNewCharacter(conn *session.Session) {
 
 	name, _ := conn.Chomp()
 
+	// TODO: allow just A-Za-z, lexer needs it
 	if cfg.IsBadName(name) || game.PlayerFileExists(name) {
 		conn.Tell(cfg.GetMessage("disallowed_name"))
 	} else {
