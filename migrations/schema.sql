@@ -35,6 +35,21 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: players; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.players (
+    id uuid NOT NULL,
+    password character varying(64) NOT NULL,
+    race smallint DEFAULT '0'::smallint NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.players OWNER TO postgres;
+
+--
 -- Name: schema_migration; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -44,6 +59,14 @@ CREATE TABLE public.schema_migration (
 
 
 ALTER TABLE public.schema_migration OWNER TO postgres;
+
+--
+-- Name: players players_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.players
+    ADD CONSTRAINT players_pkey PRIMARY KEY (id);
+
 
 --
 -- Name: schema_migration_version_idx; Type: INDEX; Schema: public; Owner: postgres

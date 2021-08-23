@@ -20,9 +20,9 @@ type Player struct {
 	Name string
 	Password string
 	Race Race
-	Flags map[string]bool
+	Flags map[string]bool // TODO: migrate to a separate player flags thingy
 	Version uint64
-	RoomId uint64
+	RoomId uint64 // TODO:  t.ForeignKey("room_id", {"rooms": ["id"]})
 }
 
 func (player *Player) SetPassword(unsecurePassword string) {
