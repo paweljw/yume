@@ -6,3 +6,15 @@ build: server/server.go
 
 clean:
 	rm -f bin/server
+
+create:
+	soda create -e development
+
+drop:
+	soda drop -e development
+
+migrate:
+	soda migrate -e development
+
+rollback:
+	soda migrate down -e development
