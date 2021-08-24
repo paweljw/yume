@@ -1,5 +1,0 @@
-create_table("players"){
-    t.Column("id", "uuid", { "primary": true })
-    t.Column("password", "string", { "size": 64 })
-    t.Column("race", "smallint", { "default": 0 })
-}
