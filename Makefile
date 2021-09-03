@@ -1,20 +1,11 @@
-run:
-	go run server/server.go
+server: build migrate
+	bin/yume server
 
-build: server/server.go
-	go build -o bin/ server/server.go
+migrate: build
+	bin/yume migrate
+
+build: exe/yume.go exe/server.go
+	go build -o bin/ exe/yume.go exe/server.go
 
 clean:
-	rm -f bin/server
-
-create:
-	soda create -e development
-
-drop:
-	soda drop -e development
-
-migrate:
-	soda migrate -e development
-
-rollback:
-	soda migrate down -e development
+	rm -f bin/yume

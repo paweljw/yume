@@ -10,9 +10,11 @@ import (
 	"yume/models"
 	ntw "yume/network"
 	ses "yume/session"
+
+	cli "github.com/urfave/cli/v2"
 )
 
-func main() {
+func server(_ *cli.Context) error {
 	log.Println("Yume is initializing")
 
 	err := models.EstablishConnection()
@@ -33,11 +35,11 @@ func main() {
 	log.Println("Loaded all items")
 
 	PORT := ":19000"
-	l, err := net.Listen("tcp4", PORT)
+	l, err := net.Listen("tcp", PORT)
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
+
 	defer l.Close()
 	rand.Seed(time.Now().Unix())
 
@@ -46,8 +48,7 @@ func main() {
 	for {
 		c, err := l.Accept()
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 		// TODO: handle banned IPs
 		connection := ses.Session{Connection: c, State: ses.NewSession}
