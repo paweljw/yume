@@ -1,17 +1,34 @@
 package models
 
 import (
-	pop "github.com/gobuffalo/pop/v5"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-var DB *pop.Connection
+var Db *gorm.DB
 
-func EstablishConnection() {
-	db, err := pop.Connect("development") // TODO: environment from... somewhere
+func EstablishConnection() error {
+	// TODO: Configurable DSN
+	dsn := "host=localhost user=postgres password=postgres dbname=yume_development port=5439 sslmode=disable"
+	var err error
+	Db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	DB = db
+	Db.AutoMigrate(
+		&Zone{},
+		&Room{},
+		&Item{},
+		&Container{},
+		&ContainerInventory{},
+		&RoomConnection{},
+		&RoomContainer{},
+		&Player{},
+		&PlayerCurrentInventory{},
+		&RoomCurrentInventory{},
+	)
+
+	return err
 }

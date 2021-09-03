@@ -1,8 +1,8 @@
 package models
 
-type Zone struct {
+type Room struct {
 	ID          int64
-	Name        string
 	Description string
-	IsSafe      bool
+	ZoneId      int64
+	Zone        Zone
 }

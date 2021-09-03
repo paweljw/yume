@@ -5,24 +5,20 @@ import (
 	"math/rand"
 	"net"
 	"time"
+	cfg "yume/config"
+	"yume/game"
+	"yume/models"
 	ntw "yume/network"
 	ses "yume/session"
-	cfg "yume/config"
-	"yume/models"
-	"yume/game"
 )
 
 func main() {
 	log.Println("Yume is initializing")
 
-	models.EstablishConnection()
-
-	zone := models.Zone{ID: 1, Name: "hey", Description: "oh god no"}
-
-	err := models.DB.Create(&zone)
+	err := models.EstablishConnection()
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	cfg.LoadConfiguration()
