@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"log"
 	"strings"
+	"yume/models"
 	ses "yume/session"
 )
 
@@ -20,9 +21,8 @@ func toggleFlag(session *ses.Session, command string, value bool) {
 		ses.Sessions.ConcurrentIterate(func(e *list.Element) bool {
 			c := *e.Value.(*ses.Session)
 
-			if c.Player.NameEquals(playerName) {
+			if strings.EqualFold(c.Player.Name, playerName) {
 				c.Player.SetFlag(flagName, value)
-				c.Player.SaveToFile()
 				c.Tell("You were granted flag: %s", flagName)
 				session.Tell("Granted flag %s to %s (online)", flagName, playerName)
 				log.Printf("%s granted flag %s to %s", session.Player.Name, flagName, playerName)
@@ -34,15 +34,14 @@ func toggleFlag(session *ses.Session, command string, value bool) {
 		})
 
 		if !doneOnline {
-			player, err := game.LoadPlayerFromFile(playerName)
+			player, found := models.FindPlayerByName(playerName)
 
-			if err != nil {
+			if !found {
 				session.Tell("Something went wrong while granting flag")
 				return
 			}
 
 			player.SetFlag(flagName, value)
-			player.SaveToFile()
 			session.Tell("Granted flag %s to %s (offline)", flagName, playerName)
 			log.Printf("%s granted flag %s to %s", session.Player.Name, flagName, playerName)
 		}

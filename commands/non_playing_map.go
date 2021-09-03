@@ -15,11 +15,14 @@ func handleNewSession(conn *session.Session) {
 
 	if command == "new" {
 		conn.State = session.NewCharacter
+	} else if command == "quit" {
+		conn.Tell("So be it.")
+		conn.Finishing = true
+		return
 	} else {
-		player := models.Player{}
-		models.Db.Where("name ILIKE ?", command).First(&player)
+		player, found := models.FindPlayerByName(command)
 
-		if player.ID != 0 {
+		if found {
 			conn.Tell(cfg.GetMessage("provide_password"), command)
 			command, _ = conn.Chomp()
 
@@ -28,7 +31,7 @@ func handleNewSession(conn *session.Session) {
 				conn.State = session.Playing
 
 				conn.Tell(cfg.GetMessage("welcome_back"), conn.Player.Name)
-				MovePlayer(conn, uint64(conn.Player.SavedRoomId))
+				MovePlayer(conn, conn.Player.SavedRoomId)
 
 				log.Printf("Successful sign-in from %s", conn.Player.Name)
 			} else {
@@ -112,7 +115,7 @@ func handleSelectRace(conn *session.Session) {
 	conn.Tell(cfg.GetMessage("race_selected"))
 	log.Printf("New character registered: %s ((%s))", conn.Player.Name, conn.Player.Race)
 	conn.State = session.Playing
-	MovePlayer(conn, uint64(conn.Player.CurrentRoomId))
+	MovePlayer(conn, conn.Player.CurrentRoomId)
 }
 
 var NonPlayingStates = map[session.SessionState]func(*session.Session){

@@ -26,5 +26,5 @@ INSERT INTO room_connections (from_id, to_id, direction) VALUES (
 INSERT INTO room_connections (from_id, to_id, direction) VALUES (
   2,
   1,
-  2 -- EAST
+  2 -- ACTUALLY FUCKING SOUTH, LEARN TO READ
 );

@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"yume/game"
+	"yume/models"
 	ses "yume/session"
 )
 
@@ -9,12 +9,12 @@ import (
 func handleLook(session *ses.Session, command string) {
 	session.Tell("You look around.")
 
-	LookAtRoom(session, session.Player.RoomId)
+	LookAtRoom(session, session.Player.CurrentRoomId)
 }
 
-func LookAtRoom(session *ses.Session, roomId uint64) {
-	room := game.Rooms[roomId]
+func LookAtRoom(session *ses.Session, roomId int64) {
+	room := models.Rooms[roomId]
 
-	session.Tell(room.Description)
+	session.Tell("\n%s", room.Description)
 	session.Tell("\nExits: %s", room.Exits())
 }

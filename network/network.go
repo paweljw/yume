@@ -3,16 +3,15 @@ package network
 import (
 	"log"
 	"strings"
-	cfg "yume/config"
-	"yume/game"
-	ses "yume/session"
 	"yume/commands"
+	cfg "yume/config"
+	"yume/models"
+	ses "yume/session"
 )
-
 
 func HandleSession(session *ses.Session) {
 	log.Printf("Serving %s\n", session.Connection.RemoteAddr().String())
-	session.Player = game.DefaultPlayer()
+	session.Player = &models.Player{}
 	session.Finishing = false
 
 	session.Tell(cfg.GetMessage("motd"))
@@ -38,6 +37,12 @@ func HandleSession(session *ses.Session) {
 
 			if handler != nil {
 				handler(session)
+
+				// EEUGH. Still needs a rework of the ordering here.
+				if session.Finishing {
+					break
+				}
+
 				continue
 			} else {
 				session.Tell("How'd you even get here, bro? Bye.")
@@ -50,14 +55,13 @@ func HandleSession(session *ses.Session) {
 		}
 	}
 
-	if session.Player.IsSaveable() {
+	if session.Player.ID != 0 {
 		session.Tell("Saving character...")
-		session.Player.SaveToFile()
-		log.Printf("Saved %s to disk", session.Player.Name)
+		models.Db.Save(session.Player)
+		log.Printf("Saved %s to db", session.Player.Name)
 	}
 
 	log.Printf("Finished serving %s (%s)\n", session.Connection.RemoteAddr().String(), session.Player.Name)
 	session.Connection.Close()
 	ses.RemoveSessionFromList(session)
 }
-
