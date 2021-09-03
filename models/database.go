@@ -33,6 +33,7 @@ func EstablishConnection() error {
 		&RoomCurrentInventory{},
 	)
 
+	// TODO: Configurable redis location
 	pool := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
 			return redis.Dial("tcp", "localhost:6379")

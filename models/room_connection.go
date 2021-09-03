@@ -18,10 +18,10 @@ const (
 )
 
 type RoomConnection struct {
-	Id           int64
-	FromId       int64
+	Id           uint
+	FromId       uint
 	From         Room
-	ToId         int64
+	ToId         uint
 	To           Room
 	Direction    Direction
 	LockedById   sql.NullInt64

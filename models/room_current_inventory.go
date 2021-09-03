@@ -4,10 +4,14 @@ import "gorm.io/gorm"
 
 type RoomCurrentInventory struct {
 	gorm.Model
-	RoomContainerId int64
+	RoomId          uint
+	Room            Room
+	ContainerId     uint
+	Container       Container
+	RoomContainerId uint
 	RoomContainer   RoomContainer
-	ItemId          int64
+	ItemId          uint
 	Item            Item
-	VisibleToId     int64
+	VisibleToId     uint
 	VisibleTo       Player
 }

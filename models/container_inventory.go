@@ -1,10 +1,10 @@
 package models
 
 type ContainerInventory struct {
-	ID          int64
-	ContainerId int64
+	ID          uint
+	ContainerId uint
 	Container   Container
-	ItemId      int64
+	ItemId      uint
 	Item        Item
 	Rate        float64 `gorm:"default:1.0"`
 }

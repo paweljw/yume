@@ -1,7 +1,7 @@
 package models
 
 type Zone struct {
-	ID          int64
+	ID          uint
 	Name        string
 	Description string
 	IsSafe      bool

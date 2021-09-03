@@ -1,8 +1,9 @@
 package models
 
 type Container struct {
-	Id          int64
-	Name        string
-	Description string
-	IsFloor     bool
+	ID                   uint
+	Name                 string
+	Description          string
+	IsFloor              bool
+	ContainerInventories []ContainerInventory
 }

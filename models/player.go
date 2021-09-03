@@ -30,9 +30,9 @@ type Player struct {
 	Password      string
 	Race          Race
 	Pronouns      Pronouns
-	SavedRoomId   int64
+	SavedRoomId   uint
 	SavedRoom     Room
-	CurrentRoomId int64
+	CurrentRoomId uint
 	CurrentRoom   Room
 }
 

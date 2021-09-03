@@ -22,10 +22,11 @@ func handleMovement(session *ses.Session, command string) {
 	MovePlayer(session, nextRoom)
 }
 
-func MovePlayer(session *ses.Session, toRoom int64) {
+func MovePlayer(session *ses.Session, toRoom uint) {
 	if room, ok := models.Rooms[toRoom]; ok {
 		log.Printf("%s moved from %d to %d", session.Player.Name, session.Player.CurrentRoomId, room.ID)
 		session.Player.CurrentRoomId = room.ID
+		room.SpawnContainersFor(*session.Player)
 		LookAtRoom(session, room.ID)
 	} else {
 		session.Tell("That's disallowed - nonexistent room.")
