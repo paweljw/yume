@@ -6,7 +6,6 @@ import (
 	"net"
 	"time"
 	cfg "yume/config"
-	"yume/game"
 	"yume/models"
 	ntw "yume/network"
 	ses "yume/session"
@@ -27,11 +26,11 @@ func server(_ *cli.Context) error {
 	log.Println("Loaded configuration file")
 
 	log.Println("Begin loading rooms")
-	game.LoadAllRooms()
+	models.LoadAllRooms()
 	log.Println("Loaded all rooms")
 
 	log.Println("Begin loading items")
-	game.LoadAllItems()
+	models.LoadAllItems()
 	log.Println("Loaded all items")
 
 	PORT := ":19000"

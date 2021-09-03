@@ -1,15 +1,15 @@
 package commands
 
 import (
-	"yume/game"
-	ses "yume/session"
 	"log"
 	"strings"
+	"yume/game"
+	ses "yume/session"
 )
 
 func handleMovement(session *ses.Session, command string) {
 	// TODO: check if player can move (debuffs, fight, jail, etc)
-	currentRoom := game.Rooms[session.Player.RoomId]
+	currentRoom := game.Rooms[uint64(session.Player.CurrentRoomId)]
 	direction := normalizeDirection(command)
 
 	nextRoom, exists := currentRoom.Connections[direction]
@@ -24,8 +24,8 @@ func handleMovement(session *ses.Session, command string) {
 
 func MovePlayer(session *ses.Session, toRoom uint64) {
 	if room, ok := game.Rooms[toRoom]; ok {
-		log.Printf("%s moved from %d to %d", session.Player.Name, session.Player.RoomId, room.Id)
-		session.Player.RoomId = room.Id
+		log.Printf("%s moved from %d to %d", session.Player.Name, session.Player.CurrentRoomId, room.Id)
+		session.Player.CurrentRoomId = room.ID
 		LookAtRoom(session, room.Id)
 	} else {
 		session.Tell("That's disallowed - nonexistent room.")

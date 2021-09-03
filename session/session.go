@@ -1,12 +1,12 @@
 package session
 
 import (
-	"net"
-	"log"
 	"bufio"
-	"strings"
 	"container/list"
-	"yume/game"
+	"log"
+	"net"
+	"strings"
+	"yume/models"
 )
 
 var Sessions = CreateSessionList()
@@ -14,7 +14,7 @@ var Sessions = CreateSessionList()
 type Session struct {
 	Connection net.Conn
 	State      SessionState
-	Player	   *game.Player
+	Player     *models.Player
 	Finishing  bool
 }
 
@@ -32,7 +32,7 @@ func (session *Session) Chomp() (string, error) {
 	return command, nil
 }
 
-func (session *Session) Tell(msg string, a...interface{}) {
+func (session *Session) Tell(msg string, a ...interface{}) {
 	TellPlayer(*session, msg, a...)
 }
 

@@ -1,11 +1,10 @@
 package commands
 
 import (
-	"strings"
-	"yume/game"
-	ses "yume/session"
-	"log"
 	"container/list"
+	"log"
+	"strings"
+	ses "yume/session"
 )
 
 func toggleFlag(session *ses.Session, command string, value bool) {

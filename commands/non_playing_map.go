@@ -1,11 +1,11 @@
 package commands
 
 import (
-	cfg "yume/config"
-	"yume/session"
-	"yume/game"
-	"strings"
 	"log"
+	"strings"
+	cfg "yume/config"
+	"yume/models"
+	"yume/session"
 )
 
 func handleNewSession(conn *session.Session) {
@@ -15,23 +15,26 @@ func handleNewSession(conn *session.Session) {
 
 	if command == "new" {
 		conn.State = session.NewCharacter
-	} else { // existing character
-		if game.PlayerFileExists(command) {
+	} else {
+		player := models.Player{}
+		models.Db.Where("name ILIKE ?", command).First(&player)
+
+		if player.ID != 0 {
 			conn.Tell(cfg.GetMessage("provide_password"), command)
-			player, _ := game.LoadPlayerFromFile(command)
 			command, _ = conn.Chomp()
+
 			if player.ComparePassword(command) {
-				conn.Player = game.MigratePlayer(player)
+				conn.Player = &player
 				conn.State = session.Playing
+
 				conn.Tell(cfg.GetMessage("welcome_back"), conn.Player.Name)
-				MovePlayer(conn, conn.Player.RoomId) // TODO: When hearthstones exist, move player to their HS location for safety
+				MovePlayer(conn, uint64(conn.Player.SavedRoomId))
 
 				log.Printf("Successful sign-in from %s", conn.Player.Name)
 			} else {
 				conn.State = session.NewSession
 				log.Printf("Unsuccessful sign-in for %s", player.Name)
 			}
-
 		} else {
 			conn.Tell(cfg.GetMessage("character_not_found"))
 			conn.Tell(cfg.GetMessage("login_prompt"))
@@ -46,10 +49,13 @@ func handleNewCharacter(conn *session.Session) {
 
 	name, _ := conn.Chomp()
 
-	// TODO: allow just A-Za-z, lexer needs it
-	if cfg.IsBadName(name) || game.PlayerFileExists(name) {
+	player := models.Player{}
+	models.Db.Where("name ILIKE ?", name).First(&player)
+
+	if cfg.IsBadName(name) || player.ID != 0 {
 		conn.Tell(cfg.GetMessage("disallowed_name"))
 	} else {
+		conn.Player = &models.Player{}
 		conn.Player.Name = name
 		conn.State = session.NewPassword
 		conn.Tell(cfg.GetMessage("accepted_name"), conn.Player.Name)
@@ -82,17 +88,20 @@ func handleSelectRace(conn *session.Session) {
 
 	switch race {
 	case "human":
-		conn.Player.Race = game.Human
+		conn.Player.Race = models.Human
 	case "elf":
-		conn.Player.Race = game.Elf
+		conn.Player.Race = models.Elf
 	case "dwarf":
-		conn.Player.Race = game.Dwarf
+		conn.Player.Race = models.Dwarf
 	default:
 		conn.State = session.SelectRace
 		return
 	}
 
-	err := conn.Player.SaveToFile()
+	// Finalizing here
+	conn.Player.CurrentRoomId = 1
+	conn.Player.SavedRoomId = 1
+	err := models.Db.Create(&conn.Player).Error
 
 	if err != nil {
 		conn.State = session.NewSession
@@ -103,13 +112,13 @@ func handleSelectRace(conn *session.Session) {
 	conn.Tell(cfg.GetMessage("race_selected"))
 	log.Printf("New character registered: %s ((%s))", conn.Player.Name, conn.Player.Race)
 	conn.State = session.Playing
-	MovePlayer(conn, conn.Player.RoomId) // TODO: Move player to designated newbie spot
+	MovePlayer(conn, uint64(conn.Player.CurrentRoomId))
 }
 
 var NonPlayingStates = map[session.SessionState]func(*session.Session){
-	session.NewSession: handleNewSession,
-	session.NewCharacter: handleNewCharacter,
-	session.NewPassword: handleNewPassword,
+	session.NewSession:     handleNewSession,
+	session.NewCharacter:   handleNewCharacter,
+	session.NewPassword:    handleNewPassword,
 	session.RepeatPassword: handleRepeatPassword,
-	session.SelectRace: handleSelectRace,
+	session.SelectRace:     handleSelectRace,
 }
